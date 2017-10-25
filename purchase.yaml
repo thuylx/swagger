@@ -1995,6 +1995,7 @@ parameters:
 definitions:
   PR:
     title: PR model
+    description: Purchase request model    
     type: object
     required:
       - title
@@ -2112,6 +2113,7 @@ definitions:
     - $ref: '#/definitions/TenantDef'
   PRItem:
     title: PR Item model
+    description: Purchase item model
     type: object
     required:
       - prId
@@ -2219,6 +2221,7 @@ definitions:
           description: comment on item
   PO:
     title: PO model
+    description: Purchase order model
     type: object
     required:
       - title
@@ -2312,6 +2315,7 @@ definitions:
     - $ref: '#/definitions/TenantDef'
   POItem:
     title: PO Item model
+    description: PO item model
     type: object
     required:
       - poId
@@ -2347,6 +2351,7 @@ definitions:
         description: Thứ tự ưu tiên của mặt hàng trong yêu cầu
   Supplier:
     title: Supplier model
+    description: Supplier model
     type: object
     required:
       - name
@@ -2542,6 +2547,7 @@ definitions:
     - $ref: '#/definitions/TenantDef'
   ItemCategoryDef:
     title: Item category definition
+    description: Danh mục loại hàng hóa
     type: object
     allOf: 
     - properties:
@@ -2556,6 +2562,7 @@ definitions:
     - $ref: '#/definitions/TenantDef'
   ItemModelDef:
     title: Item model definition
+    description: Danh mục model hàng hóa
     type: object
     allOf: 
     - properties:
@@ -2568,6 +2575,7 @@ definitions:
     - $ref: '#/definitions/TenantDef'
   SLADef:
     title: SLA definition
+    description: Danh mục các mức SLA (Service Level Agreemnet)
     type: object
     allOf: 
     - properties:
@@ -2611,6 +2619,7 @@ definitions:
     - $ref: '#/definitions/TenantDef'
   SLAModel:
     title: SLA model
+    description: SLA model, to represent SLA instances
     type: object
     allOf: 
     - properties:
