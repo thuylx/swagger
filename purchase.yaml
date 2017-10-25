@@ -6,6 +6,12 @@ info:
     This API document describe api of PR, PO and Supplier repositories. 
     It is designed to support multiple tenancy mode, indicate by the field of "tenantId" in parameters. 
     Tenancy should be seperated each other by table prefix or schema in database.
+  contact:
+    name: Thuy Le
+    email: thuylx@bontech.com.vn
+  license:
+    name: BON JSC
+    url: http://bontech.vn
 schemes:
   - http
   - https
