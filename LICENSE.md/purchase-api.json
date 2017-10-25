@@ -1,0 +1,4100 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "0.0.1",
+    "title": "API for purchasing processes",
+    "description": "This API document describe api of PR, PO and Supplier repositories. \nIt is designed to support multiple tenancy mode, indicate by the field of \"tenantId\" in parameters. \nTenancy should be seperated each other by table prefix or schema in database.\n"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "host": "bpm.bontech.vn",
+  "basePath": "/api",
+  "tags": [
+    {
+      "name": "Purchase Requests",
+      "description": "APIs of the PR repository"
+    },
+    {
+      "name": "Purchase Orders",
+      "description": "APIs of the PO repository"
+    },
+    {
+      "name": "Suppliers",
+      "description": "APIs of the Supplier repository"
+    },
+    {
+      "name": "Approvals",
+      "description": "API to approve for or comment on an object \nAn object such as PR, PO can have serveral approvals/comments from dfaiffrent parties.\n"
+    },
+    {
+      "name": "Payments",
+      "description": "TODO - APIs of the Payment Transaction repository"
+    },
+    {
+      "name": "Inventories",
+      "description": "TODO - BON is using Bravo for this.\nStudy Bravo API for inventory services.\n"
+    },
+    {
+      "name": "Assets",
+      "description": "TODO - BON is using excel for this.\n"
+    },
+    {
+      "name": "Budgets",
+      "description": "TODO - BON is using excel for this.\n"
+    },
+    {
+      "name": "Documents",
+      "description": "TODO - BON is using simple file server for this. Should implement a document management system (ECM) for this purpose\n"
+    },
+    {
+      "name": "Location Definitions",
+      "description": "APIs to manage delivery location list"
+    },
+    {
+      "name": "Item Definitions",
+      "description": "API to manage inventory item definition\nItem definition will be use as reference for purchasing processes, inventory management processes, asset management processes, budget control,...\n"
+    },
+    {
+      "name": "SLA Definitions",
+      "description": "APIs to manage SLA defination"
+    },
+    {
+      "name": "SLA Instances",
+      "description": "APIs to start, pause, resume, stop, get details and reports of SLA instances.\nIn the BPM processes, none events should be used with a execution listerner to call these APIs.\n",
+      "externalDocs": {
+        "description": "Camunda none event",
+        "url": "https://docs.camunda.org/manual/latest/reference/bpmn20/events/none-events/#intermediate-none-event-throwing"
+      }
+    }
+  ],
+  "paths": {
+    "/purchase-requests": {
+      "post": {
+        "tags": [
+          "Purchase Requests"
+        ],
+        "operationId": "createPr",
+        "summary": "Create a PR",
+        "description": "Create a purchase request in repository\nReturn ID of newly created PR\n",
+        "parameters": [
+          {
+            "name": "objPr",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/PR"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "description": "newly created id and code",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "description": "id of newly created PR"
+                },
+                "code": {
+                  "type": "string",
+                  "description": "Auto generated code of newly created PR"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Input data is invalid"
+          },
+          "401": {
+            "description": "Permission error"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Purchase Requests"
+        ],
+        "operationId": "getListPr",
+        "summary": "Get list of PR",
+        "description": "Return a list of PR objects which satisfy filter conditions in query",
+        "parameters": [
+          {
+            "$ref": "#/parameters/filterByTenant"
+          },
+          {
+            "$ref": "#/parameters/filterByCode"
+          },
+          {
+            "$ref": "#/parameters/filterByTitleContain"
+          },
+          {
+            "$ref": "#/parameters/filterByPurchaseType"
+          },
+          {
+            "$ref": "#/parameters/filterByRequester"
+          },
+          {
+            "$ref": "#/parameters/filterByRequesterDepartment"
+          },
+          {
+            "$ref": "#/parameters/filterByDeliveryLocationId"
+          },
+          {
+            "$ref": "#/parameters/filterByDeliveryLocationContain"
+          },
+          {
+            "$ref": "#/parameters/filterByCreatedDateAfter"
+          },
+          {
+            "$ref": "#/parameters/filterByCreatedDateBefore"
+          },
+          {
+            "$ref": "#/parameters/filterByExpectedDeliveryDateAfter"
+          },
+          {
+            "$ref": "#/parameters/filterByExpectedDeliveryDateBefore"
+          },
+          {
+            "$ref": "#/parameters/filterByPurposeContain"
+          },
+          {
+            "$ref": "#/parameters/filterByProcessDepartmentOwner"
+          },
+          {
+            "$ref": "#/parameters/filterByPlanningStatus"
+          },
+          {
+            "$ref": "#/parameters/filterByStatus"
+          },
+          {
+            "$ref": "#/parameters/filterByApprovalStatus"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/sort"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PR"
+              }
+            }
+          },
+          "400": {
+            "description": "Input data is invalid"
+          },
+          "401": {
+            "description": "Permission error"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/purchase-requests/count": {
+      "get": {
+        "tags": [
+          "Purchase Requests"
+        ],
+        "operationId": "getPrCount",
+        "summary": "get count of purchase request",
+        "description": "Return the number of purchase request satisfy given filters",
+        "parameters": [
+          {
+            "$ref": "#/parameters/filterByTenant"
+          },
+          {
+            "$ref": "#/parameters/filterByCode"
+          },
+          {
+            "$ref": "#/parameters/filterByTitleContain"
+          },
+          {
+            "$ref": "#/parameters/filterByPurchaseType"
+          },
+          {
+            "$ref": "#/parameters/filterByRequester"
+          },
+          {
+            "$ref": "#/parameters/filterByRequesterDepartment"
+          },
+          {
+            "$ref": "#/parameters/filterByDeliveryLocationId"
+          },
+          {
+            "$ref": "#/parameters/filterByDeliveryLocationContain"
+          },
+          {
+            "$ref": "#/parameters/filterByCreatedDateAfter"
+          },
+          {
+            "$ref": "#/parameters/filterByCreatedDateBefore"
+          },
+          {
+            "$ref": "#/parameters/filterByExpectedDeliveryDateAfter"
+          },
+          {
+            "$ref": "#/parameters/filterByExpectedDeliveryDateBefore"
+          },
+          {
+            "$ref": "#/parameters/filterByPurposeContain"
+          },
+          {
+            "$ref": "#/parameters/filterByProcessDepartmentOwner"
+          },
+          {
+            "$ref": "#/parameters/filterByPlanningStatus"
+          },
+          {
+            "$ref": "#/parameters/filterByStatus"
+          },
+          {
+            "$ref": "#/parameters/filterByApprovalStatus"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          "400": {
+            "description": "Input data is invalid"
+          },
+          "401": {
+            "description": "Permission error"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/purchase-requests/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Purchase Requests"
+        ],
+        "summary": "Find purchase request by id",
+        "description": "Returns a single purchase request",
+        "operationId": "getPrById",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/PR"
+            }
+          },
+          "400": {
+            "description": "Invalid ID"
+          },
+          "401": {
+            "description": "Permission error"
+          },
+          "404": {
+            "description": "PR not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deletePr",
+        "tags": [
+          "Purchase Requests"
+        ],
+        "summary": "Delete a purchase request",
+        "description": "Delete a purchase request by id.\nWork only if the PR is not locked\n",
+        "responses": {
+          "200": {
+            "description": "successfully"
+          },
+          "404": {
+            "description": "PR not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updatePR",
+        "tags": [
+          "Purchase Requests"
+        ],
+        "summary": "Update a purchase request",
+        "description": "Work only if the PR is not locked",
+        "parameters": [
+          {
+            "name": "objPr",
+            "in": "body",
+            "schema": {
+              "$ref": "#definitions/PR"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successfully"
+          },
+          "404": {
+            "description": "PR not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/purchase-requests/{id}/assignee": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "integer",
+          "description": "PR id"
+        }
+      ],
+      "put": {
+        "tags": [
+          "Purchase Requests"
+        ],
+        "summary": "Assign purchasing specialist to process",
+        "description": "Update processOwner",
+        "operationId": "assignOwner",
+        "parameters": [
+          {
+            "name": "processOwner",
+            "in": "body",
+            "schema": {
+              "type": "string",
+              "description": "Purchasing specialist in-charge"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "PR not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Purchase Requests"
+        ],
+        "summary": "Unassign specialist",
+        "description": "Clear processOwner",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "PR not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/purchase-requests/{id}/status": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "integer",
+          "description": "PR id"
+        }
+      ],
+      "put": {
+        "operationId": "updateStatus",
+        "tags": [
+          "Purchase Requests"
+        ],
+        "summary": "Update status of a purchase request",
+        "description": "Update status of a purchase request",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successfully"
+          },
+          "404": {
+            "description": "PR not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/purchase-requests/{id}/approvals": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "integer",
+          "description": "PR id"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Purchase Requests"
+        ],
+        "summary": "Phê duyệt PR",
+        "parameters": [
+          {
+            "name": "objApproval",
+            "in": "body",
+            "description": "description",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Approval"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "approvedItemAmount": {
+                      "$ref": "#/definitions/lstItemAmount"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "integer",
+              "description": "newly created id",
+              "example": 1234
+            }
+          },
+          "404": {
+            "description": "PR not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Purchase Requests"
+        ],
+        "summary": "Lấy danh sách phê duyệt/ý kiến cho một PR",
+        "description": "Tương đương GET /approval/purchase-requests/{id}",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Approval"
+              }
+            }
+          },
+          "404": {
+            "description": "PR not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/purchase-requests/{id}/recomended-amount": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "integer",
+          "description": "PR id"
+        }
+      ],
+      "put": {
+        "tags": [
+          "Purchase Requests"
+        ],
+        "summary": "Recomend purchasing amount for PR items",
+        "parameters": [
+          {
+            "name": "recommendedItems",
+            "in": "body",
+            "description": "List of item id and its recommended amount",
+            "schema": {
+              "$ref": "#/definitions/lstItemAmount"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "PR not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/purchase-requests/{id}/purchasing-amount": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "integer",
+          "description": "PR id"
+        }
+      ],
+      "put": {
+        "tags": [
+          "Purchase Requests"
+        ],
+        "summary": "Add PR items to purchasing list",
+        "parameters": [
+          {
+            "name": "amountAdded",
+            "in": "body",
+            "description": "Amount added in to purchasing list",
+            "schema": {
+              "$ref": "#/definitions/lstItemAmount"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "PR not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/purchase-requests/{id}/purchased-amount": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "integer",
+          "description": "PR id"
+        }
+      ],
+      "put": {
+        "tags": [
+          "Purchase Requests"
+        ],
+        "summary": "Add PR items to purchased list",
+        "parameters": [
+          {
+            "name": "amountAdded",
+            "in": "body",
+            "description": "Amount added in to purchased list",
+            "schema": {
+              "$ref": "#/definitions/lstItemAmount"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "PR not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/purchase-requests/{id}/locking": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "integer",
+          "description": "PR id"
+        }
+      ],
+      "put": {
+        "tags": [
+          "Purchase Requests"
+        ],
+        "summary": "Lock/Unlock a PR",
+        "parameters": [
+          {
+            "name": "locked",
+            "in": "body",
+            "description": "Specify activity of Lock or Unlock a PR",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "PR not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/purchase-requests/{id}/items": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "integer",
+          "description": "PR id"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Purchase Requests"
+        ],
+        "summary": "Lấy chi tiết phiếu yêu cầu mua sắm theo ID",
+        "description": "Lấy chi tiết phiếu yêu cầu mua sắm theo ID",
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PRItem"
+              }
+            },
+            "description": "OK"
+          },
+          "404": {
+            "description": "PR not found"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Purchase Requests"
+        ],
+        "summary": "Thêm mới chi tiết yêu cầu mua sắm",
+        "description": "work only if the PR is not locked",
+        "operationId": "addPurchaseDetail",
+        "parameters": [
+          {
+            "name": "objPrItem",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/PRItem"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "integer",
+              "description": "newly created id",
+              "example": 1234
+            }
+          },
+          "404": {
+            "description": "PR not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/purchase-requests/items/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "PR item id",
+          "required": true,
+          "type": "integer",
+          "format": "int"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Purchase Requests"
+        ],
+        "summary": "Lấy chi phiếu tiết mục yêu cầu mua sắm theo ID",
+        "description": "Lấy chi phiếu tiết mục yêu cầu mua sắm theo ID",
+        "responses": {
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/PRItem"
+            },
+            "description": "OK"
+          },
+          "404": {
+            "description": "PR item not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Purchase Requests"
+        ],
+        "summary": "Xóa một record",
+        "description": "work only if the PR is not locked",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "PR item not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Purchase Requests"
+        ],
+        "summary": "Update thông tin bản ghi",
+        "description": "Work only if the PR is not locked",
+        "parameters": [
+          {
+            "name": "objPrItem",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/PRItem"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "PR item not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/suppliers": {
+      "get": {
+        "tags": [
+          "Suppliers"
+        ],
+        "summary": "Lấy danh sách nhà cung cấp",
+        "description": "Lấy danh sách tất cả nhà cung cấp",
+        "parameters": [
+          {
+            "$ref": "#/parameters/filterByTenant"
+          },
+          {
+            "$ref": "#/parameters/filterByNameContain"
+          },
+          {
+            "$ref": "#/parameters/filterByCode"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/sort"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Supplier"
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Suppliers"
+        ],
+        "summary": "thêm mới nhà cung cấp",
+        "description": "thêm mới nhà cung cấp",
+        "parameters": [
+          {
+            "name": "objSupplier",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Supplier"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "integer",
+              "description": "newly created id",
+              "example": 1234
+            }
+          }
+        }
+      }
+    },
+    "/suppliers/count": {
+      "get": {
+        "tags": [
+          "Suppliers"
+        ],
+        "summary": "Đếm số lượng nhà cung cấp",
+        "description": "Đếm số lượng nhà cung cấp",
+        "parameters": [
+          {
+            "$ref": "#/parameters/filterByTenant"
+          },
+          {
+            "$ref": "#/parameters/filterByNameContain"
+          },
+          {
+            "$ref": "#/parameters/filterByCode"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "integer"
+            },
+            "description": "OK"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/suppliers/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "integer",
+          "description": "Supplier ID"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Suppliers"
+        ],
+        "summary": "Lấy thông tin nhà cung cấp",
+        "description": "Lấy thông tin chi tiết nhà cung cấp",
+        "operationId": "getSupplierById",
+        "responses": {
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/Supplier"
+            },
+            "description": "OK"
+          },
+          "404": {
+            "description": "Supplier not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Suppliers"
+        ],
+        "summary": "Sửa thông tin nhà cung cấp",
+        "description": "Sửa thông tin nhà cung cấp",
+        "operationId": "updateSupplier",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "objSupplier",
+            "schema": {
+              "$ref": "#/definitions/Supplier"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Supplier not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Suppliers"
+        ],
+        "summary": "Xóa nhà cung cấp",
+        "operationId": "deleteSupplierId",
+        "description": "Xóa một nhà cung cấp khi chưa phát sinh dữ liệu khỏi hệ thống",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Supplier not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/suppliers/{id}/status": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "integer",
+          "description": "Supplier ID"
+        }
+      ],
+      "put": {
+        "tags": [
+          "Suppliers"
+        ],
+        "summary": "Update trạng thái của nhà cung cấp",
+        "description": "Update trạng thái của nhà cung cấp",
+        "operationId": "updateSupplierStatus",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "type": "string",
+            "description": "trạng thái mới",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Supplier not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/purchase-orders": {
+      "post": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "Thêm mới đợt mua sắm",
+        "description": "Thêm một đợt mua sắm",
+        "parameters": [
+          {
+            "name": "objPo",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/PO"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "integer",
+              "description": "newly created id",
+              "example": 1234
+            }
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "Lấy danh sách các đợt mua sắm",
+        "description": "Lấy danh sách các đợt mua sắm",
+        "parameters": [
+          {
+            "$ref": "#/parameters/filterByTenant"
+          },
+          {
+            "$ref": "#/parameters/filterByCode"
+          },
+          {
+            "$ref": "#/parameters/filterByTitleContain"
+          },
+          {
+            "$ref": "#/parameters/filterByCreatedDateBefore"
+          },
+          {
+            "$ref": "#/parameters/filterByCreatedDateAfter"
+          },
+          {
+            "$ref": "#/parameters/filterByStatus"
+          },
+          {
+            "$ref": "#/parameters/filterByDeliveryLocationContain"
+          },
+          {
+            "$ref": "#/parameters/filterByApprovalStatus"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/sort"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PO"
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/purchase-orders/count": {
+      "get": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "Get PO count",
+        "description": "Get number of PO",
+        "parameters": [
+          {
+            "$ref": "#/parameters/filterByTenant"
+          },
+          {
+            "$ref": "#/parameters/filterByCode"
+          },
+          {
+            "$ref": "#/parameters/filterByTitleContain"
+          },
+          {
+            "$ref": "#/parameters/filterByCreatedDateBefore"
+          },
+          {
+            "$ref": "#/parameters/filterByCreatedDateAfter"
+          },
+          {
+            "$ref": "#/parameters/filterByStatus"
+          },
+          {
+            "$ref": "#/parameters/filterByDeliveryLocationContain"
+          },
+          {
+            "$ref": "#/parameters/filterByApprovalStatus"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "/purchase-orders/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "description": "PO id",
+          "in": "path",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "Lấy chi tiết một đợt mua sắm",
+        "description": "Lấy chi tiết một đợt mua sắm",
+        "responses": {
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/PO"
+            },
+            "description": "OK"
+          },
+          "404": {
+            "description": "PO not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "Xóa một đợt mua sắm",
+        "description": "Work only if the PO is not locked",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "PO not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "Sửa thông tin một đợt mua sắm",
+        "description": "work only if the PO is not locked",
+        "parameters": [
+          {
+            "name": "objPo",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/PO"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "PO not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/purchase-orders/{id}/assignee": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "integer",
+          "description": "PO id"
+        }
+      ],
+      "put": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "Assign purchasing specialist to process",
+        "description": "Update PO processOwner",
+        "operationId": "assignPoOwner",
+        "parameters": [
+          {
+            "name": "processOwner",
+            "in": "body",
+            "schema": {
+              "type": "string",
+              "description": "Purchasing specialist in-charge"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "PO not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "Unassign specialist",
+        "description": "Clear processOwner",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "PO not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/purchase-orders/{id}/status": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "integer",
+          "description": "PO id"
+        }
+      ],
+      "put": {
+        "operationId": "updatePOStatus",
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "update status of a purchase order",
+        "description": "update status of a purchase order",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successfully"
+          },
+          "404": {
+            "description": "PO not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/purchase-orders/{id}/approvals": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "PO id",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "Phê duyệt PO",
+        "description": "Approve/comment a PO",
+        "parameters": [
+          {
+            "name": "objApproval",
+            "in": "body",
+            "description": "description",
+            "schema": {
+              "$ref": "#/definitions/Approval"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "integer",
+              "description": "newly created id",
+              "example": 1234
+            }
+          },
+          "404": {
+            "description": "PO not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "Lấy danh sách phê duyệt/ý kiến cho một PO",
+        "description": "Get list of approvals/comments for a PO",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Approval"
+              }
+            }
+          },
+          "404": {
+            "description": "PO not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/purchase-orders/{id}/documents": {
+      "parameters": [
+        {
+          "name": "id",
+          "description": "PO id",
+          "in": "path",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "Confirm documents are accepted",
+        "description": "Accountant confirm PO's documents accepted",
+        "parameters": [
+          {
+            "name": "comment",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "isAccepted": {
+                  "type": "boolean"
+                },
+                "comment": {
+                  "type": "string",
+                  "maxLength": 2000,
+                  "description": "Acceptant comment"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "PO not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/purchase-orders/{id}/delivered-amount": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "integer",
+          "description": "PO id"
+        }
+      ],
+      "put": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "Add PO items to delivered list",
+        "parameters": [
+          {
+            "name": "amountAdded",
+            "in": "body",
+            "description": "Amount added in to delivered list",
+            "schema": {
+              "$ref": "#/definitions/lstItemAmount"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "PR not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/purchase-orders/{id}/accepted-amount": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "integer",
+          "description": "PO id"
+        }
+      ],
+      "put": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "Mark PO items as passed acceptant check",
+        "parameters": [
+          {
+            "name": "amountAdded",
+            "in": "body",
+            "description": "Amount added in to accepted list",
+            "schema": {
+              "$ref": "#/definitions/lstItemAmount"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "PR not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/purchase-orders/{id}/locking": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "integer",
+          "description": "PO id"
+        }
+      ],
+      "put": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "Lock/Unlock a PO",
+        "parameters": [
+          {
+            "name": "lockStatus",
+            "in": "body",
+            "description": "Specify activity of Lock or Unlock a PO",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "PO not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/purchase-orders/{id}/items": {
+      "parameters": [
+        {
+          "name": "id",
+          "description": "PO id",
+          "in": "path",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "Lấy chi tiết các Item và số lượng đợt mua sắm",
+        "description": "Lấy chi tiết các Item và số lượng đợt mua sắm",
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/POItem"
+              }
+            },
+            "description": "O"
+          },
+          "404": {
+            "description": "PO not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "Thêm các item vào đợt mua sắm",
+        "description": "Work only if the PO is not locked",
+        "parameters": [
+          {
+            "name": "objPoItem",
+            "in": "body",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/POItem"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "integer",
+              "description": "newly created id",
+              "example": 1234
+            }
+          },
+          "404": {
+            "description": "PO not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/purchase-orders/item/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "integer",
+          "description": "PO item id"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "Get a PO item",
+        "description": "Get a PO item by ID",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/POItem"
+            }
+          },
+          "404": {
+            "description": "PO item not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "Xóa một Item của đợt mua sắm",
+        "description": "Work only if the PO is not locked",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "PO item not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "Update thông tin chi tiết một item",
+        "description": "Work only if the PO is not locked",
+        "parameters": [
+          {
+            "name": "objPoItem",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/POItem"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "PO item not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/purchase-orders/item/{id}/priority": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "integer",
+          "description": "PO item id"
+        }
+      ],
+      "put": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "Set PO item priority",
+        "description": "Work only if the PO is not locked",
+        "parameters": [
+          {
+            "name": "priority",
+            "in": "body",
+            "schema": {
+              "type": "integer",
+              "example": 123
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "PO item not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/approvals": {
+      "post": {
+        "tags": [
+          "Approvals"
+        ],
+        "summary": "Approve/comment something",
+        "description": "Give approval or leave comment on something",
+        "parameters": [
+          {
+            "name": "objApproval",
+            "in": "body",
+            "description": "Approval information",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Approval"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "className": {
+                      "type": "string",
+                      "description": "Loại đối tượng được phê duyệt/cho ý kiến.\nVD: purchase requests, purchase orders,...\n"
+                    },
+                    "objectId": {
+                      "type": "integer",
+                      "description": "ID của đối tượng được phê duyệt/cho ý kiến"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "integer",
+              "description": "newly created id",
+              "example": 1234
+            }
+          },
+          "404": {
+            "description": "Object not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Approvals"
+        ],
+        "summary": "Get Approval list of something",
+        "description": "Get Approval list of something",
+        "parameters": [
+          {
+            "$ref": "#/parameters/filterByTenant"
+          },
+          {
+            "name": "className",
+            "in": "query",
+            "description": "Loại đối tượng được phê duyệt/cho ý kiến.\nVD: purchase requests, purchase orders,...\n",
+            "type": "string"
+          },
+          {
+            "name": "objectId",
+            "in": "query",
+            "description": "ID của đối tượng được phê duyệt/cho ý kiến",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Approval"
+              }
+            }
+          },
+          "404": {
+            "description": "Object not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/approvals/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Approval ID",
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "deprecated": true,
+        "tags": [
+          "Approvals"
+        ],
+        "summary": "Update approval",
+        "description": "Update comment, approval decision. Should not use this api",
+        "parameters": [
+          {
+            "name": "objApproval",
+            "in": "body",
+            "description": "Approval information",
+            "schema": {
+              "$ref": "#/definitions/Approval"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Approval not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "deprecated": true,
+        "tags": [
+          "Approvals"
+        ],
+        "summary": "Remove an approval",
+        "description": "Be careful when call this",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Approval not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/payments": {
+      "post": {
+        "tags": [
+          "Payments"
+        ],
+        "summary": "TODO - Create a Payment Transaction",
+        "description": "Create a payment transaction",
+        "parameters": [
+          {
+            "name": "objPayment",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Payment"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "integer",
+              "description": "id of newly created payment transaction",
+              "example": 1234
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Payments"
+        ],
+        "summary": "TODO",
+        "description": "Get a list of payment transaction",
+        "parameters": [
+          {
+            "$ref": "#/parameters/filterByTenant"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Payment"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/payments/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "integer",
+          "description": "Payment id"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Payments"
+        ],
+        "summary": "TODO",
+        "description": "Get detail of a payment transaction",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Payment"
+            }
+          }
+        }
+      }
+    },
+    "/resources": {
+      "post": {
+        "tags": [
+          "Documents"
+        ],
+        "summary": "Upload a file",
+        "operationId": "uploadFile",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "upfile",
+            "type": "file",
+            "description": "The file to upload."
+          },
+          {
+            "in": "formData",
+            "name": "title",
+            "type": "string",
+            "maxLength": 255,
+            "description": "Tiêu đề file"
+          },
+          {
+            "in": "formData",
+            "name": "description",
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Mô tả hay trích lục gợi nhớ nội dung file\nTrường này và title cũng sẽ được dùng để tìm kiếm vì tạm thời chưa hỗ trợ full text search\n"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "integer",
+              "description": "id of newly uploaded document",
+              "example": 1234
+            }
+          }
+        }
+      }
+    },
+    "/resources/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "type": "integer",
+          "required": true
+        }
+      ],
+      "get": {
+        "tags": [
+          "Documents"
+        ],
+        "summary": "Get info of a uploaded document",
+        "operationId": "getFile",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Resource"
+            }
+          }
+        }
+      }
+    },
+    "/locations": {
+      "post": {
+        "tags": [
+          "Location Definitions"
+        ],
+        "summary": "create a location",
+        "parameters": [
+          {
+            "name": "objLocation",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/LocationDef"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "integer",
+              "description": "newly created id",
+              "example": 1234
+            }
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Location Definitions"
+        ],
+        "summary": "Lấy danh mục vị trí",
+        "parameters": [
+          {
+            "$ref": "#/parameters/filterByTenant"
+          },
+          {
+            "$ref": "#/parameters/filterByTitleContain"
+          },
+          {
+            "$ref": "#/parameters/filterByStatus"
+          },
+          {
+            "$ref": "#/parameters/filterByDescriptionContain"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/sort"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/LocationDef"
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/locations/count": {
+      "get": {
+        "tags": [
+          "Location Definitions"
+        ],
+        "summary": "Get PO count",
+        "description": "Get number of PO",
+        "parameters": [
+          {
+            "$ref": "#/parameters/filterByTenant"
+          },
+          {
+            "$ref": "#/parameters/filterByTitleContain"
+          },
+          {
+            "$ref": "#/parameters/filterByStatus"
+          },
+          {
+            "$ref": "#/parameters/filterByDescriptionContain"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "/locations/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "description": "Location id",
+          "in": "path",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Location Definitions"
+        ],
+        "summary": "Lấy chi tiết một vị trí",
+        "responses": {
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/LocationDef"
+            },
+            "description": "OK"
+          },
+          "404": {
+            "description": "PO not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Location Definitions"
+        ],
+        "summary": "Xóa một vị trí khỏi danh mục",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Location not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Location Definitions"
+        ],
+        "summary": "Sửa thông tin một vị trí",
+        "parameters": [
+          {
+            "name": "objLocation",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/LocationDef"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Location not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/locations/{id}/precedence": {
+      "parameters": [
+        {
+          "name": "id",
+          "description": "Location id",
+          "in": "path",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "tags": [
+          "Location Definitions"
+        ],
+        "summary": "Set precedence number for location",
+        "description": "precedence number will be used to sort the list of location from smallest to largest",
+        "parameters": [
+          {
+            "name": "precedenceNumber",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/inventory-item-definitions": {
+      "post": {
+        "tags": [
+          "Item Definitions"
+        ],
+        "summary": "create an item definition",
+        "parameters": [
+          {
+            "name": "objItemDef",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/LocationDef"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "integer",
+              "description": "newly created id",
+              "example": 1234
+            }
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Item Definitions"
+        ],
+        "summary": "Lấy danh mục vị trí",
+        "parameters": [
+          {
+            "$ref": "#/parameters/filterByTenant"
+          },
+          {
+            "$ref": "#/parameters/filterByTitleContain"
+          },
+          {
+            "$ref": "#/parameters/filterByStatus"
+          },
+          {
+            "$ref": "#/parameters/filterByDescriptionContain"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/sort"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ItemDef"
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/inventory-item-definitions/count": {
+      "get": {
+        "tags": [
+          "Item Definitions"
+        ],
+        "summary": "Get PO count",
+        "description": "Get number of PO",
+        "parameters": [
+          {
+            "$ref": "#/parameters/filterByTenant"
+          },
+          {
+            "$ref": "#/parameters/filterByTitleContain"
+          },
+          {
+            "$ref": "#/parameters/filterByStatus"
+          },
+          {
+            "$ref": "#/parameters/filterByDescriptionContain"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "/inventory-item-definitions/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "description": "Item id",
+          "in": "path",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Item Definitions"
+        ],
+        "summary": "Lấy chi tiết một danh mục hàng hóa",
+        "responses": {
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/ItemDef"
+            },
+            "description": "OK"
+          },
+          "404": {
+            "description": "Item not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Item Definitions"
+        ],
+        "summary": "Xóa một item khỏi danh mục",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Item not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Item Definitions"
+        ],
+        "summary": "Sửa thông tin một item",
+        "parameters": [
+          {
+            "name": "objItemDef",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/ItemDef"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Item not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/inventory-item-definitions/{id}/precedence": {
+      "parameters": [
+        {
+          "name": "id",
+          "description": "Location id",
+          "in": "path",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "tags": [
+          "Item Definitions"
+        ],
+        "summary": "Set precedence number for item",
+        "description": "precedence number will be used to sort the list of location from smallest to largest",
+        "parameters": [
+          {
+            "name": "precedenceNumber",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/inventory-item-definitions/categories": {
+      "post": {
+        "tags": [
+          "Item Definitions"
+        ],
+        "summary": "create a item category definition",
+        "parameters": [
+          {
+            "name": "objItemCatDef",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/ItemCategoryDef"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "integer",
+              "description": "newly created id",
+              "example": 1234
+            }
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Item Definitions"
+        ],
+        "summary": "Lấy danh mục Item Categories",
+        "parameters": [
+          {
+            "$ref": "#/parameters/filterByTenant"
+          },
+          {
+            "$ref": "#/parameters/filterByTitleContain"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/sort"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ItemCategoryDef"
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/inventory-item-definitions/models": {
+      "post": {
+        "tags": [
+          "Item Definitions"
+        ],
+        "summary": "create a item model definition",
+        "parameters": [
+          {
+            "name": "objItemModelDef",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/ItemModelDef"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "integer",
+              "description": "newly created id",
+              "example": 1234
+            }
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Item Definitions"
+        ],
+        "summary": "Lấy danh mục Item Model",
+        "parameters": [
+          {
+            "$ref": "#/parameters/filterByTenant"
+          },
+          {
+            "$ref": "#/parameters/filterByTitleContain"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/sort"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ItemModelDef"
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/sla-definitions": {
+      "post": {
+        "tags": [
+          "SLA Definitions"
+        ],
+        "summary": "create a SLA definition",
+        "parameters": [
+          {
+            "name": "objSLADef",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/SLADef"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "integer",
+              "description": "newly created id",
+              "example": 1234
+            }
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "SLA Definitions"
+        ],
+        "summary": "Get list of SLA definition",
+        "parameters": [
+          {
+            "$ref": "#/parameters/filterByTenant"
+          },
+          {
+            "$ref": "#/parameters/filterByCode"
+          },
+          {
+            "$ref": "#/parameters/filterByTitleContain"
+          },
+          {
+            "$ref": "#/parameters/filterByStatus"
+          },
+          {
+            "$ref": "#/parameters/filterByDescriptionContain"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/sort"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SLADef"
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/sla-definitions/count": {
+      "get": {
+        "tags": [
+          "SLA Definitions"
+        ],
+        "summary": "Get SLA definition count",
+        "description": "Get number of SLA definition",
+        "parameters": [
+          {
+            "$ref": "#/parameters/filterByTenant"
+          },
+          {
+            "$ref": "#/parameters/filterByCode"
+          },
+          {
+            "$ref": "#/parameters/filterByTitleContain"
+          },
+          {
+            "$ref": "#/parameters/filterByStatus"
+          },
+          {
+            "$ref": "#/parameters/filterByDescriptionContain"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "/sla-definitions/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "description": "SLA id",
+          "in": "path",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "get": {
+        "tags": [
+          "SLA Definitions"
+        ],
+        "summary": "Get detail of a SLA definition",
+        "responses": {
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/SLADef"
+            },
+            "description": "OK"
+          },
+          "404": {
+            "description": "SLA definition not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "SLA Definitions"
+        ],
+        "summary": "Delete a SLA definition",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "SLA definition not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "SLA Definitions"
+        ],
+        "summary": "Edit SLA definition",
+        "parameters": [
+          {
+            "name": "objSLADef",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/SLADef"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "SLA definition not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/sla-definition/{id}/precedence": {
+      "parameters": [
+        {
+          "name": "id",
+          "description": "Location id",
+          "in": "path",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "tags": [
+          "SLA Definitions"
+        ],
+        "summary": "Set precedence number for SLA definition",
+        "description": "precedence number will be used to sort the list of SLA definition from smallest to largest",
+        "parameters": [
+          {
+            "name": "precedenceNumber",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/sla": {
+      "post": {
+        "tags": [
+          "SLA Instances"
+        ],
+        "summary": "Start a SLA monitor",
+        "description": "Create a SLA and start calculate elapsed time",
+        "parameters": [
+          {
+            "name": "objSLAModel",
+            "in": "body",
+            "description": "SLA object to start",
+            "schema": {
+              "$ref": "#/definitions/SLAModel"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "SLA Instances"
+        ],
+        "summary": "TODO - Get a list of SLA instances",
+        "description": "TODO",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/sla/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "description": "SLA instance id",
+          "in": "path",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "get": {
+        "tags": [
+          "SLA Instances"
+        ],
+        "summary": "TODO - Get a detail of a SLA instance",
+        "description": "TODO",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SLAModel"
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "SLA Instances"
+        ],
+        "summary": "Update SLA progress",
+        "description": "pause, resume, stop a SLA instance",
+        "parameters": [
+          {
+            "name": "action",
+            "in": "body",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pause",
+                "resume",
+                "stop"
+              ],
+              "example": "stop",
+              "default": "stop"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "SLA instance not found"
+          },
+          "500": {
+            "$ref": "#/responses/Standard500ErrorResponse"
+          }
+        }
+      }
+    },
+    "/sla/reports": {
+      "get": {
+        "tags": [
+          "SLA Instances"
+        ],
+        "summary": "TODO - get SLA reports",
+        "description": "TODO",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "parameters": {
+    "filterByTenant": {
+      "name": "tenantId",
+      "description": "Indicate tenant ID such as \"bon\", \"vetc\", ... to filter.\nDefault value (if is null or opmited) is \"default\".\n",
+      "type": "string",
+      "in": "query",
+      "default": "default"
+    },
+    "filterByPurchaseType": {
+      "name": "purchaseType",
+      "type": "string",
+      "in": "query",
+      "enum": [
+        "asset",
+        "inventory"
+      ]
+    },
+    "filterByTitleContain": {
+      "name": "titleContain",
+      "type": "string",
+      "in": "query"
+    },
+    "filterByCode": {
+      "name": "code",
+      "type": "string",
+      "in": "query"
+    },
+    "filterByRequester": {
+      "name": "requester",
+      "type": "string",
+      "in": "query"
+    },
+    "filterByRequesterDepartment": {
+      "name": "requesterDepartment",
+      "type": "string",
+      "in": "query"
+    },
+    "filterByExpectedDeliveryDateBefore": {
+      "name": "expectedDeliveryDateBefore",
+      "type": "string",
+      "in": "query"
+    },
+    "filterByExpectedDeliveryDateAfter": {
+      "name": "expectedDeliveryDateAfter",
+      "type": "string",
+      "in": "query"
+    },
+    "filterByDeliveryLocationId": {
+      "name": "deliveryLocationId",
+      "type": "integer",
+      "in": "query"
+    },
+    "filterByDeliveryLocationContain": {
+      "name": "deliveryLocationContain",
+      "type": "string",
+      "in": "query"
+    },
+    "filterByPurposeContain": {
+      "name": "purposeContain",
+      "type": "string",
+      "in": "query"
+    },
+    "filterByPlanningStatus": {
+      "name": "isPlanned",
+      "type": "boolean",
+      "in": "query"
+    },
+    "filterByProcessDepartmentOwner": {
+      "name": "processDerpartmentOwner",
+      "type": "string",
+      "in": "query"
+    },
+    "filterByStatus": {
+      "name": "status",
+      "type": "string",
+      "in": "query"
+    },
+    "filterByCreatedDateBefore": {
+      "name": "createdDateBefore",
+      "type": "string",
+      "in": "query"
+    },
+    "filterByCreatedDateAfter": {
+      "name": "createdDateAfter",
+      "type": "string",
+      "in": "query"
+    },
+    "filterByRelatedDepartmentContain": {
+      "name": "relatedDepartmentContain",
+      "type": "string",
+      "in": "query"
+    },
+    "filterByApprovalStatus": {
+      "name": "isApproved",
+      "type": "boolean",
+      "in": "query"
+    },
+    "filterByNameContain": {
+      "name": "nameContain",
+      "description": "filter name contain given text",
+      "in": "query",
+      "type": "string"
+    },
+    "filterByDescriptionContain": {
+      "name": "descriptionContain",
+      "in": "query",
+      "type": "string",
+      "description": "filter description contain given text"
+    },
+    "filterByTag": {
+      "name": "tags",
+      "description": "Filter by tags. Multiple tags are supported, seperate by coma.\nFor example: tags=delivery,office\n",
+      "in": "query",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "collectionFormat": "csv"
+    },
+    "limit": {
+      "name": "limit",
+      "description": "Number of object to be returned (size of returing page)",
+      "in": "query",
+      "type": "integer",
+      "default": 50
+    },
+    "offset": {
+      "name": "offset",
+      "description": "Order number of returning page",
+      "in": "query",
+      "type": "integer",
+      "default": 0
+    },
+    "sort": {
+      "name": "sortBy",
+      "description": "Sort indicators. \nFields saparated by coma. \nUse +/- before field name to indicate asc/desc sort order.\nEx: sortBy=+name,-amount\n",
+      "in": "query",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^(\\+-)?[a-z0-9_]+"
+      },
+      "collectionFormat": "csv"
+    }
+  },
+  "definitions": {
+    "PR": {
+      "title": "PR model",
+      "type": "object",
+      "required": [
+        "title",
+        "requester",
+        "purpose",
+        "isPlanned",
+        "purchaseType"
+      ],
+      "allOf": [
+        {
+          "properties": {
+            "id": {
+              "type": "integer",
+              "readOnly": true
+            },
+            "purchaseType": {
+              "type": "string",
+              "enum": [
+                "asset",
+                "inventory"
+              ]
+            },
+            "title": {
+              "type": "string",
+              "maxLength": 255
+            },
+            "code": {
+              "type": "string",
+              "maxLength": 255,
+              "readOnly": true
+            },
+            "requester": {
+              "type": "string",
+              "maxLength": 255
+            },
+            "requestDepartment": {
+              "type": "string",
+              "maxLength": 255
+            },
+            "expectedDeliveryDate": {
+              "type": "string",
+              "format": "date",
+              "example": "2017-09-22"
+            },
+            "deliveryLocationId": {
+              "type": "integer",
+              "format": "int"
+            },
+            "deliveryLocation": {
+              "type": "string",
+              "maxLength": 255,
+              "readOnly": true
+            },
+            "resourceId": {
+              "type": "integer",
+              "format": "int"
+            },
+            "purpose": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "isPlanned": {
+              "type": "boolean"
+            },
+            "preferedSupplierIds": {
+              "type": "array",
+              "description": "Recommended Supplier IDs",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "preferedSupplierNames": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 255
+              },
+              "readOnly": true
+            },
+            "preferedSupplierNote": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "budgetaryQuotations": {
+              "type": "array",
+              "items": {
+                "description": "Resource id of the uploaded file",
+                "type": "integer",
+                "format": "int",
+                "example": [
+                  123,
+                  543,
+                  7856
+                ]
+              }
+            },
+            "processOwner": {
+              "type": "string",
+              "maxLength": 50,
+              "description": "người chịu trách nhiệm thực hiện",
+              "readOnly": true
+            },
+            "status": {
+              "type": "string",
+              "maxLength": 1,
+              "readOnly": true,
+              "default": "open"
+            },
+            "createdBy": {
+              "type": "string",
+              "maxLength": 255,
+              "description": "Người lập PR. Thông thường chính là Requester"
+            },
+            "createdDatetime": {
+              "type": "string",
+              "format": "date-time",
+              "readOnly": true
+            },
+            "lastApprovalStatus": {
+              "type": "boolean",
+              "default": false,
+              "description": "approval status",
+              "readOnly": true
+            },
+            "lastApprovedBy": {
+              "type": "string",
+              "description": "Người phê duyệt gần nhất, trạng thái lần phê duyệt gần nhất lưu ở lastApprovalStatus",
+              "readOnly": true
+            },
+            "lastApprovalDatetime": {
+              "type": "string",
+              "format": "date-time",
+              "readOnly": true
+            },
+            "isLocked": {
+              "type": "boolean",
+              "description": "PR basic content is not editable once PR locked.\nBelow API will not be available when locking\n  - PUT /pr/{id}\n  - All of action POST, PUT, DELETE on PR items\n",
+              "default": true
+            },
+            "processInstanceId": {
+              "type": "integer",
+              "description": "Giá trị của quy trình yêu cầu mua sắm"
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/TenantDef"
+        }
+      ]
+    },
+    "PRItem": {
+      "title": "PR Item model",
+      "type": "object",
+      "required": [
+        "prId",
+        "itemCode",
+        "modelId",
+        "purpose",
+        "requestedAmount",
+        "purchaseType"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "ID tự tăng",
+          "readOnly": true
+        },
+        "prId": {
+          "type": "integer",
+          "description": "PR id"
+        },
+        "itemCode": {
+          "type": "integer",
+          "description": "Mã danh mục hàng hóa"
+        },
+        "modelId": {
+          "type": "integer",
+          "description": "Mã nhãn hàng"
+        },
+        "model": {
+          "type": "string",
+          "readOnly": true
+        },
+        "purpose": {
+          "type": "string",
+          "description": "Giải trình Mục đích mua",
+          "maxLength": 2000
+        },
+        "requestedDate": {
+          "type": "string",
+          "format": "date",
+          "example": "2017-09-22T00:00:00.000Z",
+          "description": "Ngày yêu cầu"
+        },
+        "expectedDeliveryDate": {
+          "type": "string",
+          "format": "date",
+          "example": "2017-09-22T00:00:00.000Z",
+          "description": "Dự kiến ngày cần"
+        },
+        "requestedAmount": {
+          "type": "number",
+          "description": "Số lượng yêu cầu"
+        },
+        "recommendedAmount": {
+          "readOnly": true,
+          "type": "number",
+          "description": "Số lượng khuyến nghị mua"
+        },
+        "approvedAmount": {
+          "readOnly": true,
+          "type": "number",
+          "description": "Số lượng mua được đồng ý"
+        },
+        "purchasedAmount": {
+          "readOnly": true,
+          "type": "number",
+          "description": "Số lượng đã mua"
+        },
+        "purchasingAmount": {
+          "readOnly": true,
+          "type": "number",
+          "description": "Số lượng hàng đang mua"
+        },
+        "remainingAmount": {
+          "readOnly": true,
+          "type": "number",
+          "description": "Số lượng hàng còn phải mua tiếp"
+        },
+        "processOwner": {
+          "readOnly": true,
+          "type": "string",
+          "description": "Người thực hiện mua hàng"
+        },
+        "referencePrice": {
+          "readOnly": true,
+          "type": "string",
+          "description": "Giá tham khảo"
+        },
+        "referenceResource": {
+          "readOnly": true,
+          "type": "string",
+          "description": "Tài nguyên tham khảo"
+        },
+        "isCompleted": {
+          "readOnly": true,
+          "type": "string",
+          "format": "1/0",
+          "description": "Đã mua hết hàng cần mua"
+        },
+        "referenceSample": {
+          "type": "string",
+          "description": "hàng mẫu"
+        },
+        "purchaseType": {
+          "type": "string",
+          "description": "Kiểu mua hàng dự án hay mua tài sản",
+          "enum": [
+            "asset",
+            "inventory"
+          ]
+        }
+      }
+    },
+    "lstItemAmount": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "integer",
+            "description": "Item id",
+            "example": 1234
+          },
+          "amount": {
+            "type": "number",
+            "description": "Item amount",
+            "example": 1000
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "comment on item"
+          }
+        }
+      }
+    },
+    "PO": {
+      "title": "PO model",
+      "type": "object",
+      "required": [
+        "title"
+      ],
+      "allOf": [
+        {
+          "properties": {
+            "id": {
+              "type": "integer",
+              "description": "Giá trị ID tự tăng",
+              "readOnly": true
+            },
+            "processInstanceId": {
+              "type": "integer",
+              "description": "Giá trị của quy trình thực hiện mua sắm"
+            },
+            "createdDatetime": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Thời gian tạo đợt mua hàng",
+              "readOnly": true
+            },
+            "title": {
+              "type": "string",
+              "description": "Tên đợt mua sắm"
+            },
+            "description": {
+              "type": "string",
+              "description": "Mô tả đợt mua sắm"
+            },
+            "status": {
+              "type": "string",
+              "description": "Trạng thái hiện tại của đượt mua sắm",
+              "readOnly": true
+            },
+            "processOwner": {
+              "type": "string",
+              "description": "người xử lý mua hàng",
+              "readOnly": true
+            },
+            "expectedDeliveryDate": {
+              "type": "string",
+              "format": "date",
+              "description": "Thời gian dự kiến hàng về"
+            },
+            "deliveryLocation": {
+              "type": "string",
+              "description": "nơi dự kiến nhận hàng"
+            },
+            "note": {
+              "type": "string",
+              "description": "giá trị lưu lại đơn hàng phục vụ tra cứu"
+            },
+            "quotationFiles": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "description": "resource id",
+                "example": [
+                  12,
+                  76,
+                  87
+                ]
+              }
+            },
+            "draftContractFiles": {
+              "description": "bản dự thảo (word)",
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "description": "resource id"
+              }
+            },
+            "finalContractFiles": {
+              "description": "bản đã ký (pdf)",
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "description": "resource id"
+              }
+            },
+            "resourceId": {
+              "type": "string",
+              "description": "lưu lại id của tài nguyên liên quan, nếu có."
+            },
+            "documentAccepted": {
+              "type": "boolean",
+              "description": "Tình trạng đủ chứng từ hợp lệ hay không",
+              "default": true,
+              "readOnly": true
+            },
+            "lastApprovalStatus": {
+              "type": "boolean",
+              "default": false,
+              "description": "approval status",
+              "readOnly": true
+            },
+            "lastApprovedBy": {
+              "type": "string",
+              "description": "Người phê duyệt gần nhất, trạng thái lần phê duyệt gần nhất lưu ở lastApprovalStatus",
+              "readOnly": true
+            },
+            "lastApprovalDatetime": {
+              "type": "string",
+              "format": "date-time",
+              "readOnly": true
+            },
+            "isLocked": {
+              "type": "boolean",
+              "description": "PO basic content is not editable once PO is locked.\nBelow API will not be available when locking\n  - PUT /purchase-orders/{id}\n  - All of action POST, PUT, DELETE on PO items\n",
+              "default": true
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/TenantDef"
+        }
+      ]
+    },
+    "POItem": {
+      "title": "PO Item model",
+      "type": "object",
+      "required": [
+        "poId",
+        "prItemId",
+        "orderedAmount"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Giá trị  ID tự tăng",
+          "readOnly": true
+        },
+        "poId": {
+          "type": "integer",
+          "description": "Giá trị ID purchase order"
+        },
+        "prItemId": {
+          "type": "integer",
+          "description": "PR item liên quan"
+        },
+        "orderedAmount": {
+          "type": "number",
+          "description": "Số lượng cần mua"
+        },
+        "deliveredAmount": {
+          "type": "number",
+          "description": "Số lượng đã giao",
+          "readOnly": true
+        },
+        "acceptedAmount": {
+          "type": "number",
+          "description": "Số lượng đã nghiệm thu",
+          "readOnly": true
+        },
+        "note": {
+          "type": "string",
+          "description": "Thông tin bổ xung"
+        },
+        "priority": {
+          "type": "integer",
+          "description": "Thứ tự ưu tiên của mặt hàng trong yêu cầu"
+        }
+      }
+    },
+    "Supplier": {
+      "title": "Supplier model",
+      "type": "object",
+      "required": [
+        "name",
+        "code",
+        "countryId",
+        "phone1",
+        "email"
+      ],
+      "allOf": [
+        {
+          "properties": {
+            "id": {
+              "readOnly": true,
+              "description": "ID của nhà cung cấp",
+              "type": "integer"
+            },
+            "name": {
+              "type": "string",
+              "description": "Tên của nhà cung cấp"
+            },
+            "code": {
+              "type": "string",
+              "description": "Mã đặc tả nhà cung cấp"
+            },
+            "address": {
+              "type": "string",
+              "description": "Địa chỉ của nhà cung cấp"
+            },
+            "countryId": {
+              "type": "integer",
+              "description": "Mã quốc gia"
+            },
+            "countryName": {
+              "type": "string",
+              "description": "Quốc gia",
+              "readOnly": true
+            },
+            "email": {
+              "type": "string",
+              "format": "email",
+              "description": "Email liên hệ"
+            },
+            "phone1": {
+              "type": "string",
+              "format": "phonenumber",
+              "description": "Số điện thoại liên hệ 01"
+            },
+            "phone2": {
+              "type": "string",
+              "format": "phonenumber",
+              "description": "Số điện thoại liên hệ 02"
+            },
+            "website": {
+              "type": "string",
+              "description": "Trang web của nhà cung cấp"
+            },
+            "taxcode": {
+              "type": "string",
+              "description": "Mã số thuế"
+            },
+            "fax": {
+              "type": "string",
+              "description": "Fax"
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/TenantDef"
+        }
+      ]
+    },
+    "Approval": {
+      "title": "Approval model",
+      "description": "Container for Approval information",
+      "type": "object",
+      "required": [
+        "approverName",
+        "comment",
+        "approved"
+      ],
+      "allOf": [
+        {
+          "properties": {
+            "id": {
+              "type": "integer",
+              "readOnly": true
+            },
+            "approverName": {
+              "type": "string",
+              "maxLength": 255
+            },
+            "approverTitle": {
+              "type": "string",
+              "maxLength": 255
+            },
+            "approverRole": {
+              "type": "string",
+              "maxLength": 255
+            },
+            "comment": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "approved": {
+              "description": "agree or disagree",
+              "type": "boolean",
+              "default": false
+            },
+            "attachments": {
+              "type": "array",
+              "items": {
+                "description": "resource id",
+                "type": "integer"
+              },
+              "description": "File đính kèm phần trả lời"
+            },
+            "submitedTime": {
+              "type": "string",
+              "format": "date-time",
+              "readOnly": true
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/TenantDef"
+        }
+      ]
+    },
+    "Payment": {
+      "title": "Payment model",
+      "description": "Quản lý giao dịch thanh toán",
+      "type": "object",
+      "allOf": [
+        {
+          "properties": {
+            "id": {
+              "type": "integer",
+              "readOnly": true
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/TenantDef"
+        }
+      ]
+    },
+    "Resource": {
+      "title": "Resource model",
+      "description": "Quản lý các file đính kèm",
+      "type": "object",
+      "allOf": [
+        {
+          "properties": {
+            "id": {
+              "type": "integer",
+              "readOnly": true
+            },
+            "title": {
+              "type": "string",
+              "maxLength": 255
+            },
+            "description": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "uri": {
+              "type": "string",
+              "description": "Đường dẫn đến file"
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/TenantDef"
+        }
+      ]
+    },
+    "LocationDef": {
+      "title": "Location definition",
+      "description": "Danh mục vị trí giao nhận hàng",
+      "type": "object",
+      "allOf": [
+        {
+          "properties": {
+            "id": {
+              "type": "integer",
+              "readOnly": true
+            },
+            "title": {
+              "type": "string",
+              "maxLength": 255
+            },
+            "description": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "status": {
+              "type": "string",
+              "description": "enabled/disabled",
+              "enum": [
+                "enabled",
+                "disabled"
+              ]
+            },
+            "parentId": {
+              "type": "integer",
+              "description": "Parent location's ID"
+            },
+            "tags": {
+              "type": "array",
+              "description": "Use tag to filter such as delivery, province, district, ...",
+              "items": {
+                "type": "string",
+                "example": [
+                  "delivery",
+                  "office"
+                ]
+              }
+            },
+            "precedence": {
+              "type": "integer",
+              "description": "ordinal number to sort in list"
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/TenantDef"
+        }
+      ]
+    },
+    "ItemDef": {
+      "title": "Item definition",
+      "description": "Danh mục hàng hóa",
+      "type": "object",
+      "allOf": [
+        {
+          "properties": {
+            "id": {
+              "type": "integer",
+              "readOnly": true
+            },
+            "code": {
+              "type": "integer",
+              "description": "mã hàng hóa"
+            },
+            "title": {
+              "type": "string",
+              "maxLength": 255
+            },
+            "description": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "categoryId": {
+              "type": "integer"
+            },
+            "category": {
+              "type": "string",
+              "maxLength": 255,
+              "readOnly": true
+            },
+            "modelId": {
+              "type": "integer"
+            },
+            "model": {
+              "type": "string",
+              "maxLength": 255,
+              "readOnly": true
+            },
+            "precedence": {
+              "type": "integer",
+              "description": "ordinal number to sort in list"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "enabled",
+                "disabled"
+              ]
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/TenantDef"
+        }
+      ]
+    },
+    "ItemCategoryDef": {
+      "title": "Item category definition",
+      "type": "object",
+      "allOf": [
+        {
+          "properties": {
+            "id": {
+              "type": "integer",
+              "readOnly": true
+            },
+            "title": {
+              "type": "string",
+              "maxLength": 255
+            },
+            "parentCategoryId": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/TenantDef"
+        }
+      ]
+    },
+    "ItemModelDef": {
+      "title": "Item model definition",
+      "type": "object",
+      "allOf": [
+        {
+          "properties": {
+            "id": {
+              "type": "integer",
+              "readOnly": true
+            },
+            "title": {
+              "type": "string",
+              "maxLength": 255
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/TenantDef"
+        }
+      ]
+    },
+    "SLADef": {
+      "title": "SLA definition",
+      "type": "object",
+      "allOf": [
+        {
+          "properties": {
+            "code": {
+              "type": "string",
+              "maxLength": 100
+            },
+            "title": {
+              "type": "string",
+              "maxLength": 255
+            },
+            "description": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "resolutionTime": {
+              "type": "string",
+              "description": "Expected duration, define in ISO 8601 Durations format",
+              "externalDocs": {
+                "description": "ISO 8601",
+                "url": "https://en.wikipedia.org/wiki/ISO_8601#Durations"
+              }
+            },
+            "notifyTime": {
+              "description": "define time SLA manager send message to notify called process instance.",
+              "type": "object",
+              "properties": {
+                "timerType": {
+                  "type": "string",
+                  "enum": [
+                    "timeDate",
+                    "timeDuration",
+                    "timeCycle"
+                  ],
+                  "externalDocs": {
+                    "url": "https://docs.camunda.org/manual/latest/reference/bpmn20/events/timer-events/#defining-a-timer",
+                    "description": "See camundar's timer event for more information about concept of timeDate, timeDuration, timeCycle"
+                  }
+                },
+                "timerDefinition": {
+                  "type": "string"
+                }
+              }
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "enabled",
+                "disabled"
+              ]
+            },
+            "precedence": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/TenantDef"
+        }
+      ]
+    },
+    "SLAModel": {
+      "title": "SLA model",
+      "type": "object",
+      "allOf": [
+        {
+          "properties": {
+            "slaDefinitionId": {
+              "type": "integer"
+            },
+            "expectedTime": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Calculate expected time when createing based on SLA definition since SLA definition maybe changed after then.",
+              "readOnly": true
+            },
+            "notifyTime": {
+              "description": "Copy from SLA definition",
+              "type": "object",
+              "properties": {
+                "timerType": {
+                  "type": "string",
+                  "enum": [
+                    "timeDate",
+                    "timeDuration",
+                    "timeCycle"
+                  ],
+                  "externalDocs": {
+                    "url": "https://docs.camunda.org/manual/latest/reference/bpmn20/events/timer-events/#defining-a-timer",
+                    "description": "See camundar's timer event for more information about concept of timeDate, timeDuration, timeCycle"
+                  }
+                },
+                "timerDefinition": {
+                  "type": "string"
+                }
+              },
+              "readOnly": true
+            },
+            "processInstanceId": {
+              "type": "string",
+              "description": "Id of BPM process instance that SLA is monitoring.\nSLA manager will send message to notify according to SLA notifyTime defination to this process instance.\n"
+            },
+            "processBusinessKey": {
+              "type": "string",
+              "description": "Business Key of the BPM process instance.\nIn Camunda BPM system, we usually use business key to map runing process instance with its processing business object (such as PR number, PO number etc). Copy Business Key to SLA instance to avoid missing this information after cleaning up Camunda historical data.\n"
+            },
+            "startTime": {
+              "type": "string",
+              "format": "date-time",
+              "description": "default is created time"
+            },
+            "stopTime": {
+              "type": "string",
+              "format": "date-time",
+              "readOnly": true
+            },
+            "elapsedTime": {
+              "type": "string",
+              "description": "Define in ISO 8601 Durations format",
+              "externalDocs": {
+                "description": "ISO 8601",
+                "url": "https://en.wikipedia.org/wiki/ISO_8601#Durations"
+              },
+              "readOnly": true
+            },
+            "progress": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "begin": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "end": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "readOnly": true
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/TenantDef"
+        }
+      ]
+    },
+    "TenantDef": {
+      "title": "Tenant definition",
+      "description": "This section defines the field of \"tenantId\" which will be added into all of relevant data model such as PR, PO, Suppliers, Payment, ...\n\"tenantId\" is used to indicate the tenant which data object belong to.\n",
+      "properties": {
+        "tenantId": {
+          "type": "string",
+          "maxLength": 20,
+          "description": "for multiple tenancy purpose",
+          "default": "default",
+          "example": "bon"
+        }
+      }
+    }
+  },
+  "responses": {
+    "Standard500ErrorResponse": {
+      "description": "An unexpected error occured.",
+      "schema": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
