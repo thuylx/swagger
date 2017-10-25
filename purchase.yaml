@@ -747,7 +747,1126 @@ paths:
           description: OK
           schema:
             type: integer
- 
+  '/purchase-orders/{id}':
+    parameters:
+      - name: id
+        description: PO id
+        in: path
+        required: true
+        type: integer
+    get:
+      tags:
+        - Purchase Orders
+      summary: Lấy chi tiết một đợt mua sắm
+      operationId: getPo
+      description: Lấy chi tiết một đợt mua sắm
+      responses:
+        '200':
+          schema:
+            $ref: '#/definitions/PO'
+          description: OK
+        '404':
+          description: PO not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+    delete:
+      tags:
+        - Purchase Orders
+      summary: Xóa một đợt mua sắm
+      description: Work only if the PO is not locked
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: PO not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+    put:
+      tags:
+        - Purchase Orders
+      summary: Sửa thông tin một đợt mua sắm
+      description: work only if the PO is not locked
+      parameters:
+        - name: objPo
+          in: body
+          schema:
+            $ref: '#/definitions/PO'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: PO not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+  '/purchase-orders/{id}/assignee':
+    parameters:
+      - name: id
+        in: path
+        required: true
+        type: integer
+        description: PO id
+    put:
+      tags:
+        - Purchase Orders
+      summary: Assign purchasing specialist to process
+      description: Update PO processOwner
+      operationId: assignPoOwner
+      parameters:
+        - name: processOwner
+          in: body
+          schema:
+            type: string
+            description: Purchasing specialist in-charge
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: PO not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+    delete:
+      tags:
+        - Purchase Orders
+      summary: Unassign specialist
+      description: Clear processOwner
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: PO not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+  '/purchase-orders/{id}/status':
+    parameters:
+      - name: id
+        in: path
+        required: true
+        type: integer
+        description: PO id
+    put:
+      operationId: updatePOStatus
+      tags:
+        - Purchase Orders
+      summary: update status of a purchase order
+      description: update status of a purchase order
+      parameters:
+        - name: status
+          in: body
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successfully
+        '404':
+          description: PO not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+  '/purchase-orders/{id}/approvals':
+    parameters:
+      - name: id
+        in: path
+        description: PO id
+        required: true
+        type: integer
+    post:
+      tags:
+        - Purchase Orders
+      summary: Phê duyệt PO
+      description: 'Approve/comment a PO'
+      parameters:
+        - name: objApproval
+          in: body
+          description: description
+          schema:
+            $ref: '#/definitions/Approval'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: integer
+            description: newly created id
+            example: 1234
+        '404':
+          description: PO not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+    get:
+      tags:
+        - Purchase Orders
+      summary: Lấy danh sách phê duyệt/ý kiến cho một PO
+      description: Get list of approvals/comments for a PO
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Approval'
+        '404':
+          description: PO not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+  '/purchase-orders/{id}/documents':
+    parameters:
+      - name: id
+        description: PO id
+        in: path
+        required: true
+        type: integer
+    put:
+      tags:
+        - Purchase Orders
+      summary: Confirm documents are accepted
+      description: Accountant confirm PO's documents accepted
+      parameters:
+        - name: comment
+          in: body
+          schema:
+            type: object
+            properties:
+              isAccepted:
+                type: boolean
+              comment:
+                type: string
+                maxLength: 2000
+                description: Acceptant comment
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: PO not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+  '/purchase-orders/{id}/delivered-amount':
+    parameters:
+      - name: id
+        in: path
+        required: true
+        type: integer
+        description: PO id
+    put:
+      tags:
+        - Purchase Orders
+      summary: Add PO items to delivered list
+      parameters:
+        - name: amountAdded
+          in: body
+          description: Amount added in to delivered list
+          schema:
+            $ref: '#/definitions/lstItemAmount'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: PR not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+  '/purchase-orders/{id}/accepted-amount':
+    parameters:
+      - name: id
+        in: path
+        required: true
+        type: integer
+        description: PO id
+    put:
+      tags:
+        - Purchase Orders
+      summary: Mark PO items as passed acceptant check
+      parameters:
+        - name: amountAdded
+          in: body
+          description: Amount added in to accepted list
+          schema:
+            $ref: '#/definitions/lstItemAmount'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: PR not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+  '/purchase-orders/{id}/locking':
+    parameters:
+      - name: id
+        in: path
+        required: true
+        type: integer
+        description: PO id
+    put:
+      tags:
+        - Purchase Orders
+      summary: Lock/Unlock a PO
+      parameters:
+        - name: lockStatus
+          in: body
+          description: Specify activity of Lock or Unlock a PO
+          required: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: PO not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+  '/purchase-orders/{id}/items':
+    parameters:
+      - name: id
+        description: PO id
+        in: path
+        required: true
+        type: integer
+    get:
+      tags:
+        - Purchase Orders
+      summary: Lấy chi tiết các Item và số lượng đợt mua sắm
+      description: Lấy chi tiết các Item và số lượng đợt mua sắm
+      responses:
+        '200':
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/POItem'
+          description: O
+        '404':
+          description: PO not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+    post:
+      tags:
+        - Purchase Orders
+      summary: Thêm các item vào đợt mua sắm
+      description: Work only if the PO is not locked
+      parameters:
+        - name: objPoItem
+          in: body
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/POItem'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: integer
+            description: newly created id
+            example: 1234
+        '404':
+          description: PO not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+  '/purchase-orders/item/{id}':
+    parameters:
+      - name: id
+        in: path
+        required: true
+        type: integer
+        description: PO item id
+    get:
+      tags:
+        - Purchase Orders
+      summary: Get a PO item
+      description: Get a PO item by ID
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/POItem'
+        '404':
+          description: PO item not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+    delete:
+      tags:
+        - Purchase Orders
+      summary: Xóa một Item của đợt mua sắm
+      description: Work only if the PO is not locked
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: PO item not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+    put:
+      tags:
+        - Purchase Orders
+      summary: Update thông tin chi tiết một item
+      description: Work only if the PO is not locked
+      parameters:
+        - name: objPoItem
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/POItem'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: PO item not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+  '/purchase-orders/item/{id}/priority':
+    parameters:
+      - name: id
+        in: path
+        required: true
+        type: integer
+        description: PO item id
+    put:
+      tags:
+        - Purchase Orders
+      summary: Set PO item priority
+      description: Work only if the PO is not locked
+      parameters:
+        - name: priority
+          in: body
+          schema:
+            type: integer
+            example: 123
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: PO item not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+  /approvals:
+    post:
+      tags:
+        - Approvals
+      summary: Approve/comment something
+      description: Give approval or leave comment on something
+      parameters:
+        - name: objApproval
+          in: body
+          description: Approval information
+          schema:
+            allOf:
+              - $ref: '#/definitions/Approval'
+              - type: object
+                properties:
+                  className:
+                    type: string
+                    description: |
+                      Loại đối tượng được phê duyệt/cho ý kiến.
+                      VD: purchase requests, purchase orders,...
+                  objectId:
+                    type: integer
+                    description: ID của đối tượng được phê duyệt/cho ý kiến
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: integer
+            description: newly created id
+            example: 1234
+        '404':
+          description: Object not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+    get:
+      tags:
+        - Approvals
+      summary: Get Approval list of something
+      description: Get Approval list of something
+      parameters: 
+        - $ref: '#/parameters/filterByTenant'
+        - name: className
+          in: query
+          description: |
+            Loại đối tượng được phê duyệt/cho ý kiến.
+            VD: purchase requests, purchase orders,...
+          type: string
+        - name: objectId
+          in: query
+          description:  ID của đối tượng được phê duyệt/cho ý kiến
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Approval'
+        '404':
+          description: Object not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+  '/approvals/{id}':
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Approval ID
+        type: integer
+    put:
+      deprecated: true
+      tags:
+        - Approvals
+      summary: Update approval
+      description: 'Update comment, approval decision. Should not use this api'
+      parameters:
+        - name: objApproval
+          in: body
+          description: Approval information
+          schema:
+            $ref: '#/definitions/Approval'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Approval not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+    delete:
+      deprecated: true
+      tags:
+        - Approvals
+      summary: Remove an approval
+      description: Be careful when call this
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Approval not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+  /payments:
+    post:
+      tags:
+        - Payments
+      summary: TODO - Create a Payment Transaction
+      description: Create a payment transaction
+      parameters:
+        - name: objPayment
+          in: body
+          schema:
+            $ref: '#/definitions/Payment'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: integer
+            description: id of newly created payment transaction
+            example: 1234
+    get:
+      tags:
+        - Payments
+      summary: TODO
+      description: Get a list of payment transaction
+      parameters: 
+        - $ref: '#/parameters/filterByTenant'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Payment'
+  '/payments/{id}':
+    parameters:
+      - name: id
+        in: path
+        required: true
+        type: integer
+        description: Payment id
+    get:
+      tags:
+        - Payments
+      summary: TODO
+      description: Get detail of a payment transaction
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Payment'
+  /resources:
+    post:
+      tags:
+        - Documents
+      summary: Upload a file
+      operationId: uploadFile
+      consumes:
+        - multipart/form-data
+      parameters:
+        - in: formData
+          name: upfile
+          type: file
+          description: The file to upload.
+        - in: formData
+          name: title
+          type: string
+          maxLength: 255
+          description: Tiêu đề file
+        - in: formData
+          name: description
+          type: string
+          maxLength: 2000
+          description: >
+            Mô tả hay trích lục gợi nhớ nội dung file
+
+            Trường này và title cũng sẽ được dùng để tìm kiếm vì tạm thời chưa
+            hỗ trợ full text search
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: integer
+            description: id of newly uploaded document
+            example: 1234
+  '/resources/{id}':
+    parameters:
+      - name: id
+        in: path
+        type: integer
+        required: true
+    get:
+      tags:
+        - Documents
+      summary: Get info of a uploaded document
+      operationId: getFile
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Resource'
+  /locations:
+    post:
+      tags:
+        - Location Definitions
+      summary: create a location
+      parameters:
+        - name: objLocation
+          in: body
+          schema:
+            $ref: '#/definitions/LocationDef'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: integer
+            description: newly created id
+            example: 1234
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+    get:
+      tags:
+        - Location Definitions
+      summary: Lấy danh mục vị trí
+      parameters:
+        - $ref: '#/parameters/filterByTenant'
+        - $ref: '#/parameters/filterByTitleContain'
+        - $ref: '#/parameters/filterByStatus'
+        - $ref: '#/parameters/filterByDescriptionContain'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/sort'
+      responses:
+        '200':
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/LocationDef'
+          description: OK
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+  /locations/count:
+    get:
+      tags:
+        - Location Definitions
+      summary: Get PO count
+      description: Get number of PO
+      parameters:
+        - $ref: '#/parameters/filterByTenant'
+        - $ref: '#/parameters/filterByTitleContain'
+        - $ref: '#/parameters/filterByStatus'
+        - $ref: '#/parameters/filterByDescriptionContain'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: integer
+  '/locations/{id}':
+    parameters:
+      - name: id
+        description: Location id
+        in: path
+        required: true
+        type: integer
+    get:
+      tags:
+        - Location Definitions
+      summary: Lấy chi tiết một vị trí
+      responses:
+        '200':
+          schema:
+            $ref: '#/definitions/LocationDef'
+          description: OK
+        '404':
+          description: PO not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+    delete:
+      tags:
+        - Location Definitions
+      summary: Xóa một vị trí khỏi danh mục
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Location not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+    put:
+      tags:
+        - Location Definitions
+      summary: Sửa thông tin một vị trí
+      parameters:
+        - name: objLocation
+          in: body
+          schema:
+            $ref: '#/definitions/LocationDef'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Location not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+  '/locations/{id}/precedence':
+    parameters:
+      - name: id
+        description: Location id
+        in: path
+        required: true
+        type: integer
+    put:
+      tags:
+        - Location Definitions
+      summary: Set precedence number for location
+      description: >-
+        precedence number will be used to sort the list of location from
+        smallest to largest
+      parameters:
+        - name: precedenceNumber
+          in: body
+          required: true
+          schema:
+            type: integer
+            example: 10
+      responses:
+        '200':
+          description: OK
+  /inventory-item-definitions:
+    post:
+      tags:
+        - Item Definitions
+      summary: create an item definition
+      parameters:
+        - name: objItemDef
+          in: body
+          schema:
+            $ref: '#/definitions/LocationDef'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: integer
+            description: newly created id
+            example: 1234
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+    get:
+      tags:
+        - Item Definitions
+      summary: Lấy danh mục vị trí
+      parameters:
+        - $ref: '#/parameters/filterByTenant'
+        - $ref: '#/parameters/filterByTitleContain'
+        - $ref: '#/parameters/filterByStatus'
+        - $ref: '#/parameters/filterByDescriptionContain'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/sort'
+      responses:
+        '200':
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ItemDef'
+          description: OK
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+  /inventory-item-definitions/count:
+    get:
+      tags:
+        - Item Definitions
+      summary: Get PO count
+      description: Get number of PO
+      parameters:
+        - $ref: '#/parameters/filterByTenant'
+        - $ref: '#/parameters/filterByTitleContain'
+        - $ref: '#/parameters/filterByStatus'
+        - $ref: '#/parameters/filterByDescriptionContain'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: integer
+  '/inventory-item-definitions/{id}':
+    parameters:
+      - name: id
+        description: Item id
+        in: path
+        required: true
+        type: integer
+    get:
+      tags:
+        - Item Definitions
+      summary: Lấy chi tiết một danh mục hàng hóa
+      responses:
+        '200':
+          schema:
+            $ref: '#/definitions/ItemDef'
+          description: OK
+        '404':
+          description: Item not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+    delete:
+      tags:
+        - Item Definitions
+      summary: Xóa một item khỏi danh mục
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Item not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+    put:
+      tags:
+        - Item Definitions
+      summary: Sửa thông tin một item
+      parameters:
+        - name: objItemDef
+          in: body
+          schema:
+            $ref: '#/definitions/ItemDef'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Item not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+  '/inventory-item-definitions/{id}/precedence':
+    parameters:
+      - name: id
+        description: Location id
+        in: path
+        required: true
+        type: integer
+    put:
+      tags:
+        - Item Definitions
+      summary: Set precedence number for item
+      description: >-
+        precedence number will be used to sort the list of location from
+        smallest to largest
+      parameters:
+        - name: precedenceNumber
+          in: body
+          required: true
+          schema:
+            type: integer
+            example: 10
+      responses:
+        '200':
+          description: OK
+  /inventory-item-definitions/categories:
+    post:
+      tags:
+        - Item Definitions
+      summary: create a item category definition
+      parameters:
+        - name: objItemCatDef
+          in: body
+          schema:
+            $ref: '#/definitions/ItemCategoryDef'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: integer
+            description: newly created id
+            example: 1234
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+    get:
+      tags:
+        - Item Definitions
+      summary: Lấy danh mục Item Categories
+      parameters:
+        - $ref: '#/parameters/filterByTenant'
+        - $ref: '#/parameters/filterByTitleContain'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/sort'
+      responses:
+        '200':
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ItemCategoryDef'
+          description: OK
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+  /inventory-item-definitions/models:
+    post:
+      tags:
+        - Item Definitions
+      summary: create a item model definition
+      parameters:
+        - name: objItemModelDef
+          in: body
+          schema:
+            $ref: '#/definitions/ItemModelDef'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: integer
+            description: newly created id
+            example: 1234
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+    get:
+      tags:
+        - Item Definitions
+      summary: Lấy danh mục Item Model
+      parameters:
+        - $ref: '#/parameters/filterByTenant'
+        - $ref: '#/parameters/filterByTitleContain'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/sort'
+      responses:
+        '200':
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ItemModelDef'
+          description: OK
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+  /sla-definitions:
+    post:
+      tags:
+        - SLA Definitions
+      summary: create a SLA definition
+      parameters:
+        - name: objSLADef
+          in: body
+          schema:
+            $ref: '#/definitions/SLADef'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: integer
+            description: newly created id
+            example: 1234
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+    get:
+      tags:
+        - SLA Definitions
+      summary: Get list of SLA definition
+      parameters:
+        - $ref: '#/parameters/filterByTenant'
+        - $ref: '#/parameters/filterByCode'
+        - $ref: '#/parameters/filterByTitleContain'
+        - $ref: '#/parameters/filterByStatus'
+        - $ref: '#/parameters/filterByDescriptionContain'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/sort'
+      responses:
+        '200':
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/SLADef'
+          description: OK
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+  /sla-definitions/count:
+    get:
+      tags:
+        - SLA Definitions
+      summary: Get SLA definition count
+      description: Get number of SLA definition
+      parameters:
+        - $ref: '#/parameters/filterByTenant'
+        - $ref: '#/parameters/filterByCode'
+        - $ref: '#/parameters/filterByTitleContain'
+        - $ref: '#/parameters/filterByStatus'
+        - $ref: '#/parameters/filterByDescriptionContain'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: integer
+  '/sla-definitions/{id}':
+    parameters:
+      - name: id
+        description: SLA id
+        in: path
+        required: true
+        type: integer
+    get:
+      tags:
+        - SLA Definitions
+      summary: Get detail of a SLA definition
+      responses:
+        '200':
+          schema:
+            $ref: '#/definitions/SLADef'
+          description: OK
+        '404':
+          description: SLA definition not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+    delete:
+      tags:
+        - SLA Definitions
+      summary: Delete a SLA definition
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: SLA definition not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+    put:
+      tags:
+        - SLA Definitions
+      summary: Edit SLA definition
+      parameters:
+        - name: objSLADef
+          in: body
+          schema:
+            $ref: '#/definitions/SLADef'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: SLA definition not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+  '/sla-definition/{id}/precedence':
+    parameters:
+      - name: id
+        description: Location id
+        in: path
+        required: true
+        type: integer
+    put:
+      tags:
+        - SLA Definitions
+      summary: Set precedence number for SLA definition
+      description: >-
+        precedence number will be used to sort the list of SLA definition from
+        smallest to largest
+      parameters:
+        - name: precedenceNumber
+          in: body
+          required: true
+          schema:
+            type: integer
+            example: 10
+      responses:
+        '200':
+          description: OK
+  /sla:
+    post:
+      tags:
+        - SLA Instances
+      summary: Start a SLA monitor
+      description: Create a SLA and start calculate elapsed time
+      parameters: 
+        - name: objSLAModel
+          in: body
+          description: SLA object to start
+          schema:
+            $ref: '#/definitions/SLAModel'
+      responses:
+        200:
+          description: OK
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'    
+    get:
+      tags:
+        - SLA Instances    
+      summary: TODO - Get a list of SLA instances
+      description: TODO
+      responses:
+        200:
+          description: OK
+  /sla/{id}:
+    parameters:
+      - name: id
+        description: SLA instance id
+        in: path
+        required: true
+        type: integer
+    get:
+      tags:
+        - SLA Instances    
+      summary: TODO - Get a detail of a SLA instance
+      description: TODO
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/SLAModel'        
+    put:
+      tags:
+        - SLA Instances
+      summary: Update SLA progress
+      description: pause, resume, stop a SLA instance
+      parameters: 
+        - name: action
+          in: body
+          schema:
+            type: string
+            enum:
+              - pause
+              - resume
+              - stop
+            example: stop
+            default: stop
+      responses:
+        200:
+          description: OK
+        '404':
+          description: SLA instance not found
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'       
+  /sla/reports:
+    get:
+      tags:
+        - SLA Instances      
+      summary: TODO - get SLA reports
+      description: TODO
+      responses:
+        200:
+          description: OK
+    
 parameters:
   filterByTenant:
     name: tenantId
