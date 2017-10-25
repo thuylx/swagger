@@ -2110,7 +2110,7 @@ definitions:
         processInstanceId:
           type: integer
           description: Giá trị của quy trình yêu cầu mua sắm
-    - $ref: '#/definitions/TenantDef'
+    - $ref: '#/definitions/Tenant Indicator'
   PRItem:
     title: PR Item model
     description: Purchase item model
@@ -2312,7 +2312,7 @@ definitions:
               - PUT /purchase-orders/{id}
               - All of action POST, PUT, DELETE on PO items
           default: true
-    - $ref: '#/definitions/TenantDef'
+    - $ref: '#/definitions/Tenant Indicator'
   POItem:
     title: PO Item model
     description: PO item model
@@ -2402,7 +2402,7 @@ definitions:
         fax:
           type: string
           description: Fax
-    - $ref: '#/definitions/TenantDef'
+    - $ref: '#/definitions/Tenant Indicator'
   Approval:
     title: Approval model
     description: Container for Approval information
@@ -2442,7 +2442,7 @@ definitions:
           type: string
           format: date-time
           readOnly: true
-    - $ref: '#/definitions/TenantDef'
+    - $ref: '#/definitions/Tenant Indicator'
   Payment:
     title: Payment model
     description: Quản lý giao dịch thanh toán
@@ -2452,7 +2452,7 @@ definitions:
         id:
           type: integer
           readOnly: true
-    - $ref: '#/definitions/TenantDef'
+    - $ref: '#/definitions/Tenant Indicator'
   Resource:
     title: Resource model
     description: Quản lý các file đính kèm
@@ -2471,7 +2471,7 @@ definitions:
         uri:
           type: string
           description: Đường dẫn đến file
-    - $ref: '#/definitions/TenantDef'
+    - $ref: '#/definitions/Tenant Indicator'
   LocationDef:
     title: Location definition
     description: Danh mục vị trí giao nhận hàng
@@ -2505,7 +2505,7 @@ definitions:
         precedence:
           type: integer
           description: ordinal number to sort in list
-    - $ref: '#/definitions/TenantDef'
+    - $ref: '#/definitions/Tenant Indicator'
   ItemDef:
     title: Item definition
     description: Danh mục hàng hóa
@@ -2544,7 +2544,7 @@ definitions:
           enum:
             - enabled
             - disabled
-    - $ref: '#/definitions/TenantDef'
+    - $ref: '#/definitions/Tenant Indicator'
   ItemCategoryDef:
     title: Item category definition
     description: Danh mục loại hàng hóa
@@ -2559,7 +2559,7 @@ definitions:
           maxLength: 255
         parentCategoryId:
           type: integer
-    - $ref: '#/definitions/TenantDef'
+    - $ref: '#/definitions/Tenant Indicator'
   ItemModelDef:
     title: Item model definition
     description: Danh mục model hàng hóa
@@ -2572,7 +2572,7 @@ definitions:
         title:
           type: string
           maxLength: 255
-    - $ref: '#/definitions/TenantDef'
+    - $ref: '#/definitions/Tenant Indicator'
   SLADef:
     title: SLA definition
     description: Danh mục các mức SLA (Service Level Agreemnet)
@@ -2616,7 +2616,7 @@ definitions:
           - disabled
         precedence:
           type: integer
-    - $ref: '#/definitions/TenantDef'
+    - $ref: '#/definitions/Tenant Indicator'
   SLAModel:
     title: SLA model
     description: SLA model, to represent SLA instances
@@ -2683,12 +2683,8 @@ definitions:
                 type: string
                 format: date-time
           readOnly: true
-    - $ref: '#/definitions/TenantDef'
-  TenantDef:
-    title: Tenant definition
-    description: |
-      This section defines the field of "tenantId" which will be added into all of relevant data model such as PR, PO, Suppliers, Payment, ...
-      "tenantId" is used to indicate the tenant which data object belong to.
+    - $ref: '#/definitions/Tenant Indicator'
+  Tenant Indicator:
     properties:
       tenantId:
         type: string
